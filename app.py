@@ -1,10 +1,9 @@
-# app.py
-
-import logging
 import os
+import logging
 import requests
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from adobe.pdfservices.operation.auth.service_principal_credentials import ServicePrincipalCredentials
@@ -71,7 +70,8 @@ async def convert_pdf_to_docx(request: PDFToDOCXRequest):
             file.write(stream_asset.get_input_stream())
         logging.info(f"Successfully exported PDF to DOCX: {output_file_path}")
 
-        return {"message": "Successfully converted PDF to DOCX.", "output_file": output_file_path}
+        # Return the file as a download
+        return FileResponse(output_file_path, filename=f"exported_{datetime.now().strftime('%Y%m%d%H%M%S')}.docx", media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
     except (requests.RequestException, Exception) as e:
         logging.exception(f"Exception encountered while executing operation: {e}")
